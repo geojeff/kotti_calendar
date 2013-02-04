@@ -1,13 +1,15 @@
 import colander
 import datetime
 
+from paste.deploy.converters import asbool
+
 from pyramid.compat import json
 from pyramid.i18n import get_locale_name
 from pyramid.url import resource_url
 from sqlalchemy import desc
 from sqlalchemy.sql.expression import or_
 
-from paste.deploy.converters import asbool
+from js.fullcalendar import locales as fullcalendar_locales
 
 from kotti import DBSession
 from kotti.security import has_permission
@@ -15,14 +17,18 @@ from kotti.views.edit import ContentSchema
 from kotti.views.edit import DocumentSchema
 from kotti.views.form import AddFormView
 from kotti.views.form import EditFormView
-from kotti.views.view import view_node
 from kotti.views.util import template_api
+from kotti.views.view import view_node
+from pyramid.compat import json
+from pyramid.i18n import get_locale_name
+from pyramid.url import resource_url
+from sqlalchemy import desc
+from sqlalchemy.sql.expression import or_
 
 from kotti_calendar import _
 from kotti_calendar import calendar_settings
 from kotti_calendar.resources import Calendar
 from kotti_calendar.resources import Event
-from kotti_calendar.fanstatic import fullcalendar_locales
 from kotti_calendar.fanstatic import kotti_calendar_resources
 
 
@@ -91,7 +97,7 @@ def view_calendar(context, request):
     locale_name = get_locale_name(request)
     if locale_name in fullcalendar_locales:
         fullcalendar_locales[locale_name].need()
-    else:
+    else:  # pragma: no cover (safety belt only, should never happen)
         fullcalendar_locales["en"].need()
 
     session = DBSession()
