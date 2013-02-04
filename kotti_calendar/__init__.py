@@ -9,12 +9,31 @@ def kotti_configure(settings):
     settings['pyramid.includes'] += ' kotti_calendar kotti_calendar.views'
     settings['kotti.available_types'] += ' kotti_calendar.resources.Calendar kotti_calendar.resources.Event'
 
+CALENDAR_WIDGET_DEFAULTS = {
+    'show_upcoming_events': 'true',
+    'show_past_events': 'true',
+    'calendar_position': 'above',
+    }
+
 EVENTS_WIDGET_DEFAULTS = {
     'events_count': '5',
     }
 
 
-def events_settings(name=''):
+def calendar_settings(name='', settings=None):
+
+    prefix = 'kotti_calendar.calendar_widget.'
+    if name:
+        prefix += name + '.'  # pragma: no cover
+
+    working_settings = CALENDAR_WIDGET_DEFAULTS.copy()
+
+    working_settings.update(extract_from_settings(prefix, settings=settings))
+
+    return working_settings
+
+
+def upcoming_events_settings(name=''):
     prefix = 'kotti_calendar.upcoming_events_widget.'
     if name:
         prefix += name + '.'  # pragma: no cover

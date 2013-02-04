@@ -12,11 +12,11 @@
       ${api.context.description}
     </p>
 
-    <div id="fullcalendar">
-    </div>
+    <div id="fullcalendar"
+         tal:condition="calendar_position == 'above'">
 
-    <h2 tal:condition="upcoming_events" i18n:translate="upcoming_events">Upcoming events</h2>
-    <ul tal:condition="upcoming_events">
+    <h2 tal:condition="show_upcoming_events and upcoming_events" i18n:translate="upcoming_events">Upcoming Events</h2>
+    <ul tal:condition="show_upcoming_events and upcoming_events">
       <li tal:repeat="event upcoming_events">
         <h3>
           <a href="${api.url(event)}" title="${event.description}">
@@ -33,8 +33,11 @@
       </li>
     </ul>
 
-    <h2 tal:condition="past_events" i18n:translate="past_events">Past events</h2>
-    <ul tal:condition="past_events">
+    <div id="fullcalendar"
+         tal:condition="calendar_position == 'between'">
+
+    <h2 tal:condition="show_past_events and past_events" i18n:translate="past_events">Past Events</h2>
+    <ul tal:condition="show_past_events and past_events">
       <li tal:repeat="event past_events">
         <h3>
           <a href="${api.url(event)}" title="${event.description}">
@@ -50,6 +53,9 @@
         <p>${event.description}</p>
       </li>
     </ul>
+
+    <div id="fullcalendar"
+         tal:condition="calendar_position == 'below'">
 
     <script type="text/javascript">
       $('#fullcalendar').fullCalendar($.extend(${fullcalendar_options}, localOptions));

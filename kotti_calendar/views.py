@@ -7,6 +7,8 @@ from pyramid.url import resource_url
 from sqlalchemy import desc
 from sqlalchemy.sql.expression import or_
 
+from paste.deploy.converters import asbool
+
 from kotti import DBSession
 from kotti.security import has_permission
 from kotti.views.edit import ContentSchema
@@ -17,6 +19,7 @@ from kotti.views.view import view_node
 from kotti.views.util import template_api
 
 from kotti_calendar import _
+from kotti_calendar import calendar_settings
 from kotti_calendar.resources import Calendar
 from kotti_calendar.resources import Event
 from kotti_calendar.fanstatic import fullcalendar_locales
@@ -78,6 +81,13 @@ class EventEditForm(EditFormView):
 def view_calendar(context, request):
 
     kotti_calendar_resources.need()
+
+    settings = calendar_settings()
+
+    calendar_position = settings['calendar_position']
+    show_upcoming_events = asbool(settings['show_upcoming_events'])
+    show_past_events = asbool(settings['show_past_events'])
+
     locale_name = get_locale_name(request)
     if locale_name in fullcalendar_locales:
         fullcalendar_locales[locale_name].need()
@@ -123,6 +133,9 @@ def view_calendar(context, request):
         'api': template_api(context, request),
         'upcoming_events': upcoming,
         'past_events': past,
+        'calendar_position': calendar_position,
+        'show_upcoming_events': show_upcoming_events,
+        'show_past_events': show_past_events,
         'fullcalendar_options': json.dumps(fullcalendar_options),
         }
 

@@ -5,13 +5,13 @@ from sqlalchemy.sql.expression import or_
 from kotti import DBSession
 from kotti.security import has_permission
 from kotti.views.slots import assign_slot
-from kotti_calendar import events_settings
+from kotti_calendar import upcoming_events_settings
 from kotti_calendar.resources import Event
 
 
 def upcoming_events(context, request):
     now = datetime.datetime.now()
-    settings = events_settings()
+    settings = upcoming_events_settings()
     future = or_(Event.start > now, Event.end > now)
     events = DBSession.query(Event).filter(future).order_by(Event.start).all()
     events = [event for event in events if\
