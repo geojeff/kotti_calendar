@@ -9,10 +9,12 @@ def kotti_configure(settings):
     settings['pyramid.includes'] += ' kotti_calendar kotti_calendar.views'
     settings['kotti.available_types'] += ' kotti_calendar.resources.Calendar kotti_calendar.resources.Event'
 
+
 CALENDAR_WIDGET_DEFAULTS = {
     'show_upcoming_events': 'true',
     'show_past_events': 'true',
     'calendar_position': 'above',
+    'show_events_scope': 'context_only',
     }
 
 EVENTS_WIDGET_DEFAULTS = {

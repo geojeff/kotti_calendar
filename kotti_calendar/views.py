@@ -18,6 +18,7 @@ from kotti.views.edit import DocumentSchema
 from kotti.views.form import AddFormView
 from kotti.views.form import EditFormView
 from kotti.views.util import template_api
+from kotti.views.util import nodes_tree
 from kotti.views.view import view_node
 from pyramid.compat import json
 from pyramid.i18n import get_locale_name
@@ -30,7 +31,6 @@ from kotti_calendar import calendar_settings
 from kotti_calendar.resources import Calendar
 from kotti_calendar.resources import Event
 from kotti_calendar.fanstatic import kotti_calendar_resources
-
 
 class Feeds(colander.SequenceSchema):
     feed = colander.SchemaNode(
@@ -61,7 +61,9 @@ class EventSchema(DocumentSchema):
         missing=None)
     all_day = colander.SchemaNode(
         colander.Boolean(),
-        title=_(u"All day"))
+        title=_(u"All day"),
+        default=False,
+        missing=False)
 
 
 class CalendarAddForm(AddFormView):
@@ -84,6 +86,20 @@ class EventEditForm(EditFormView):
     schema_factory = EventSchema
 
 
+def events_below_context(self, context, request, permission='view'):
+    """
+    Get recursive all children of the given context, that are Events.
+
+    :result: List with all event children of a given context.
+    :rtype: list
+    """
+    tree = nodes_tree(request,
+                      context=context,
+                      permission=permission)
+
+    return [n for n in tree.tolist()[1:] if n.type_info.name == u'Event']
+
+
 def view_calendar(context, request):
 
     kotti_calendar_resources.need()
@@ -93,6 +109,7 @@ def view_calendar(context, request):
     calendar_position = settings['calendar_position']
     show_upcoming_events = asbool(settings['show_upcoming_events'])
     show_past_events = asbool(settings['show_past_events'])
+    show_events_scope = settings['show_events_scope']
 
     locale_name = get_locale_name(request)
     if locale_name in fullcalendar_locales:
@@ -101,27 +118,49 @@ def view_calendar(context, request):
         fullcalendar_locales["en"].need()
 
     session = DBSession()
+
     now = datetime.datetime.now()
-    query = session.query(Event).filter(Event.parent_id == context.id)
-    future = or_(Event.start > now, Event.end > now)
-    upcoming = query.filter(future).order_by(Event.start).all()
-    past = query.filter(Event.start < now).order_by(desc(Event.start)).all()
+
+    if show_events_scope in ['context_only', 'site_wide']:
+
+        if show_events_scope == 'context_only':
+            query = session.query(Event).filter(Event.parent_id == context.id)
+        else:  # show_events_scope == 'site_wide'
+            query = session.query(Event)
+
+        future = or_(Event.start > now, Event.end > now)
+        upcoming = query.filter(future).order_by(Event.start).all()
+        past = query.filter(Event.start < now).order_by(desc(Event.start)).all()
+
+    else:  #show_events_scope == 'recursive':
+
+        events = events_below_context(context, request)
+        if context.type_info.name == u'Event':
+            events.append(context)
+
+        upcoming = [e for e in events if e.start > now and e.end > now]
+        past = [e for e in events if e.start < now]
+
+        upcoming.sort(key=lambda e: e.start)
+        past.sort(key=lambda e: e.start, reverse=True)
+
     upcoming = [event for event in upcoming if\
                 has_permission('view', event, request)]
     past = [event for event in past if\
                 has_permission('view', event, request)]
 
-    fmt = '%Y-%m-%d %H:%M:%S'
+    datetime_format = '%Y-%m-%d %H:%M:%S'
+
     fullcalendar_events = []
     for event in (upcoming + past):
         json_event = {
             'title': event.title,
             'url': resource_url(event, request),
-            'start': event.start.strftime(fmt),
+            'start': event.start.strftime(datetime_format),
             'allDay': event.all_day,
             }
         if event.end:
-            json_event['end'] = event.end.strftime(fmt)
+            json_event['end'] = event.end.strftime(datetime_format)
         fullcalendar_events.append(json_event)
 
     fullcalendar_options = {
