@@ -12,7 +12,7 @@ class TestUpcomingEventsWidget(FunctionalTestBase):
             'kotti.configurators':
             'kotti_calendar.kotti_configure',
             'pyramid.includes':
-            'kotti_calendar.widgets.includeme_upcoming_events',
+            'kotti_calendar.upcoming_events_widget.slot',
             }
         super(TestUpcomingEventsWidget, self).setUp(**conf)
 
@@ -99,7 +99,7 @@ class TestUpcomingEventsWidget(FunctionalTestBase):
 
         settings = get_current_registry().settings
         settings['kotti_calendar.upcoming_events_widget.num_events'] = u'7'
-        settings['kotti_calendar.calendar_widget.show_upcoming_events'] = u'true'
+        settings['kotti_calendar.upcoming_events_widget.slot'] = u'right'
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()
         # Expect a given future event title to be in javascript, in right slot
@@ -113,44 +113,38 @@ class TestUpcomingEventsWidget(FunctionalTestBase):
             ctrl('Start').value = u'2012-08-23 20:00:00'
             ctrl(name=u'save').click()
 
-        settings = get_current_registry().settings
-        settings['kotti_calendar.calendar_widget.show_past_events'] = u'true'
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()
+        browser.getLink(u'Edit').click()
+        ctrl('Show Events List?').value = u'above'
+        ctrl(name=u'save').click()
         # For each past event, expect an occurrence in javascript and list on
         # the main page. Plus one because 'Past Event' is in 'Past Events'!
         assert browser.contents.count(u"Past Event") == 13
 
-        settings = get_current_registry().settings
-        settings['kotti_calendar.calendar_widget.show_past_events'] = u'false'
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()
+        ctrl('Events Display Order').value = u'upcoming_only'
+        ctrl(name=u'save').click()
         # Expect only the occurrence in javascript.
         assert browser.contents.count(u"Past Event 5") == 1
 
-        settings = get_current_registry().settings
-        settings['kotti_calendar.calendar_widget.calendar_position'] = u'above'
-        settings['kotti_calendar.calendar_widget.show_upcoming_events'] = u'true'
-        settings['kotti_calendar.calendar_widget.show_past_events'] = u'true'
+        browser.open(self.BASE_URL)
+        browser.getLink(u'Calendar').click()
+        ctrl('Show Events List?').value = u'below'
+        ctrl('Events Display Order').value = u'upcoming_first'
+        ctrl(name=u'save').click()
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()
         html = browser.contents
         pos = browser.contents.index
         assert html.index('fullcalendar') < pos(u'Upcoming Events') < pos(u'Past Events')
 
-        settings = get_current_registry().settings
-        settings['kotti_calendar.calendar_widget.calendar_position'] = u'between'
-        settings['kotti_calendar.calendar_widget.show_upcoming_events'] = u'true'
-        settings['kotti_calendar.calendar_widget.show_past_events'] = u'true'
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()
-        pos = browser.contents.index
-        assert pos(u'Upcoming Events') < pos('fullcalendar') < pos(u'Past Events')
-
-        settings = get_current_registry().settings
-        settings['kotti_calendar.calendar_widget.calendar_position'] = u'below'
-        settings['kotti_calendar.calendar_widget.show_upcoming_events'] = u'true'
-        settings['kotti_calendar.calendar_widget.show_past_events'] = u'true'
+        ctrl('Show Events List?').value = u'above'
+        ctrl('Events Display Order').value = u'upcoming_first'
+        ctrl(name=u'save').click()
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()
         pos = browser.contents.index
