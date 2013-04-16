@@ -29,54 +29,60 @@ Calendar Page Layout
 --------------------
 
 The default layout in the calendar template is to have the calendar at the top,
-followed by a list of upcoming events, followed by a list of past events. You
-can control the positioning of the calendar relative to the two lists with the
-following setting (default is ``above``):::
+followed by a list of upcoming and past events. You have a choice of displaying
+the upcoming and past events list or not, and whether it is shown above or
+below the calendar.
 
-    kotti_calendar.calendar_widget.calendar_position = above
+And, if the events list is shown, you can control which goes first, upcoming or
+past events.
 
-A value of ``between`` will place the upcoming events list first, then the
-calendar, then the past events list. A value of ``below`` will have the two
-lists first, followed by the calendar.
+Scope of Events Shown
+---------------------
 
-The two lists, for upcoming and past events, are only shown if there are such
-events presently in the system. You can control whether these lists show,
-whether or not events are present in the system, with these too boolean
-settings (default is true for both):::
+The default calendar will only show events that have been added to the calendar
+itself. There are two other scopes available:
 
-    kotti_calendar.calendar_widget.show_upcoming_events = true
-    kotti_calendar.calendar_widget.show_past_events = true
+- site wide: Show all events found by an exhaustive search of the site database.
+- recursive: Show events found in the calendar itself, in the current context
+  (where the calendar "lives"), and in any content nodes below (a recursive
+  search is fired from the context to find any events contained below context).
 
-.. Note:: These two boolean settings apply only to the two lists that show on
-          the calendar page; they do not apply to the upcoming events widget,
-          described next.
+The ``site wide`` choice is useful for a site that has a single calendar, and
+for some reason the events need to be stored in different places around the
+site. For example, if an add-on content type is a container for events, as with
+an "ArtClass" type that contains events for class periods, the __init__.py
+setup for the add-on can set the type_info.addable_to of Event, such as:::
+
+    Event.type_info.addable_to.append("ArtClass")
+
+The ``recursive`` choice is useful for a site that has a need to show more than
+one calendar, perhaps for different divisions of a sporting league. Imagine
+that there are two divisions of the league, "East" and "West," and that there
+are separate content hierarchies for these divisions, with events held in
+some fashion within these. A calendar could be added to each division, to the
+"top" division content node, and scope set to ``recursive`` to show all events
+for the given division.
 
 Upcoming events widget
 ----------------------
 
 kotti_calendar provides a upcoming events widget, which is disabled by default.
-To enable the widget add the following to the ``pyramid.includes`` setting::
+To enable the widget in a slot add the following configuration line::
 
-  pyramid.includes = kotti_calendar.widgets.includeme_upcoming_events
+  kotti_calendar.upcoming_events_widget.slot = left
 
-With this, the upcoming events will be shown in the right column of the site.
+where the value for ``slot`` is one of:::
 
-You can adjust how many events will be shown in the widget with set
-``kotti_calendar.upcoming_events_widget.events_count`` to a different
-value. It defaults to ``5``::
+  none, left, right, abovecontent, belowcontent, beforebodyend
+
+Set this to ``none`` if you don't want the widget to show in a slot (the
+default).
+
+You can adjust how many events will be shown in the upcoming events widget, if
+shown, with ``kotti_calendar.upcoming_events_widget.events_count``.  It
+defaults to ``5``::
 
     kotti_calendar.upcoming_events_widget.events_count = 10
-
-An appropriate combination of settings, should the upcoming_events_widget be
-enabled, would be:::
-
-    kotti_calendar.calendar_widget.show_upcoming_events = false
-    kotti_calendar.calendar_widget.show_past_events = true
-    kotti_calendar.calendar_widget.calendar_position = above
-
-This would show upcoming events with the upcoming events widget in the right
-column, and the calendar at the top of the main page, with the past events
-list shown below it.
 
 .. _FullCalendar jQuery plugin: http://arshaw.com/fullcalendar/
 .. _Find out more about Kotti: http://pypi.python.org/pypi/Kotti

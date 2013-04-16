@@ -13,49 +13,34 @@
     </p>
 
     <div id="fullcalendar"
-         tal:condition="calendar_position == 'above'">
+         tal:condition="context.show_events_list == 'below'">
 
-    <h2 tal:condition="show_upcoming_events and upcoming_events" i18n:translate="upcoming_events">Upcoming Events</h2>
-    <ul tal:condition="show_upcoming_events and upcoming_events">
-      <li tal:repeat="event upcoming_events">
-        <h3>
-          <a href="${api.url(event)}" title="${event.description}">
-            ${event.title}
-          </a>
-          <span tal:define="format event.all_day and api.format_date or api.format_datetime">
-            ${format(event.start)}
-            <span tal:condition="event.end">-
-            ${format(event.end)}
-            </span>
-          </span>
-        </h3>
-        <p>${event.description}</p>
-      </li>
-    </ul>
-
-    <div id="fullcalendar"
-         tal:condition="calendar_position == 'between'">
-
-    <h2 tal:condition="show_past_events and past_events" i18n:translate="past_events">Past Events</h2>
-    <ul tal:condition="show_past_events and past_events">
-      <li tal:repeat="event past_events">
-        <h3>
-          <a href="${api.url(event)}" title="${event.description}">
-            ${event.title}
-          </a>
-          <span tal:define="format event.all_day and api.format_date or api.format_datetime">
-            ${format(event.start)}
-            <span tal:condition="event.end">-
-            ${format(event.end)}
-            </span>
-          </span>
-        </h3>
-        <p>${event.description}</p>
-      </li>
-    </ul>
+    <tal:block tal:define="events_dicts (context.events_list_order == 'upcoming_first') and [upcoming, past] or [past, upcoming]"
+               tal:repeat="events_dict events_dicts">
+      <div tal:condition="events_dict['events']">
+        <h2 tal:condition="events_dict['label'] == 'upcoming'" i18n:translate="upcoming_events">Upcoming Events</h2>
+        <h2 tal:condition="events_dict['label'] == 'past'" i18n:translate="past_events">Past Events</h2>
+        <ul>
+          <li tal:repeat="event events_dict['events']">
+            <h3>
+              <a href="${api.url(event)}" title="${event.description}">
+                ${event.title}
+              </a>
+              <span tal:define="format event.all_day and api.format_date or api.format_datetime">
+                ${format(event.start)}
+                <span tal:condition="event.end">-
+                ${format(event.end)}
+                </span>
+              </span>
+            </h3>
+            <p>${event.description}</p>
+          </li>
+        </ul>
+      </div>
+    </tal:block>
 
     <div id="fullcalendar"
-         tal:condition="calendar_position == 'below'">
+         tal:condition="context.show_events_list == 'above'">
 
     <script type="text/javascript">
       $('#fullcalendar').fullCalendar($.extend(${fullcalendar_options}, localOptions));

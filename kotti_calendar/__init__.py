@@ -1,4 +1,6 @@
+from kotti.views.slots import assign_slot
 from kotti.util import extract_from_settings
+
 from pyramid.i18n import TranslationStringFactory
 
 _ = TranslationStringFactory('kotti_calendar')
@@ -6,51 +8,53 @@ _ = TranslationStringFactory('kotti_calendar')
 
 def kotti_configure(settings):
 
+    working_settings = upcoming_events_settings(settings=settings)
+
+    if working_settings['slot'] != 'none':
+        assign_slot('upcoming-events', working_settings['slot'])
+
     settings['pyramid.includes'] += ' kotti_calendar kotti_calendar.views'
     settings['kotti.available_types'] += ' kotti_calendar.resources.Calendar kotti_calendar.resources.Event'
 
 
-CALENDAR_WIDGET_DEFAULTS = {
-    'show_upcoming_events': 'true',
-    'show_past_events': 'true',
-    'calendar_position': 'above',
-    'show_events_scope': 'context_only',
-    }
-
 EVENTS_WIDGET_DEFAULTS = {
+    'slot': 'none',
     'events_count': '5',
     }
 
 
-def calendar_settings(name='', settings=None):
+def upcoming_events_settings(name='', settings=None):
 
-    prefix = 'kotti_calendar.calendar_widget.'
-    if name:
-        prefix += name + '.'  # pragma: no cover
-
-    working_settings = CALENDAR_WIDGET_DEFAULTS.copy()
-
-    working_settings.update(extract_from_settings(prefix, settings=settings))
-
-    return working_settings
-
-
-def upcoming_events_settings(name=''):
     prefix = 'kotti_calendar.upcoming_events_widget.'
     if name:
         prefix += name + '.'  # pragma: no cover
-    settings = EVENTS_WIDGET_DEFAULTS.copy()
-    settings.update(extract_from_settings(prefix))
+
+    working_settings = EVENTS_WIDGET_DEFAULTS.copy()
+
+    working_settings.update(extract_from_settings(prefix, settings=settings))
+
     try:
-        settings['events_count'] = int(settings['events_count'])
+        working_settings['events_count'] = int(working_settings['events_count'])
     except ValueError:
-        settings['events_count'] = 5
-    return settings
+        working_settings['events_count'] = 5
+
+    try:
+        working_settings['slot'] in [u'none',
+                                     u'left',
+                                     u'right',
+                                     u'abovecontent',
+                                     u'belowcontent',
+                                     u'beforebodyend']
+    except ValueError:
+        working_settings['slot'] = 'none'
+
+    return working_settings
 
 
 def includeme(config):
 
     config.add_translation_dirs('kotti_calendar:locale')
+    config.scan(__name__)
 
 
 def _patch_colander():
