@@ -84,12 +84,12 @@ class TestUpcomingEventsWidget(FunctionalTestBase):
         assert u"Future Event 5" not in browser.contents
 
         settings = get_current_registry().settings
-        settings['kotti_calendar.upcoming_events_widget.events_count'] = u'nan'
+        settings['kotti_calendar.upcoming_events_widget.num_events'] = u'nan'
         browser.open(self.BASE_URL)
         assert u"Future Event 5" not in browser.contents
 
         settings = get_current_registry().settings
-        settings['kotti_calendar.upcoming_events_widget.events_count'] = u'7'
+        settings['kotti_calendar.upcoming_events_widget.num_events'] = u'7'
         browser.open(self.BASE_URL)
         assert u"Future Event 5" in browser.contents
 
@@ -98,7 +98,7 @@ class TestUpcomingEventsWidget(FunctionalTestBase):
         # as configured for these tests.
 
         settings = get_current_registry().settings
-        settings['kotti_calendar.upcoming_events_widget.events_count'] = u'7'
+        settings['kotti_calendar.upcoming_events_widget.num_events'] = u'7'
         settings['kotti_calendar.calendar_widget.show_upcoming_events'] = u'true'
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()

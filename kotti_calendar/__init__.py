@@ -19,7 +19,7 @@ def kotti_configure(settings):
 
 EVENTS_WIDGET_DEFAULTS = {
     'slot': 'none',
-    'events_count': '5',
+    'num_events': '5',
     }
 
 
@@ -34,9 +34,9 @@ def upcoming_events_settings(name='', settings=None):
     working_settings.update(extract_from_settings(prefix, settings=settings))
 
     try:
-        working_settings['events_count'] = int(working_settings['events_count'])
+        working_settings['num_events'] = int(working_settings['num_events'])
     except ValueError:
-        working_settings['events_count'] = 5
+        working_settings['num_events'] = 5
 
     try:
         working_settings['slot'] in [u'none',

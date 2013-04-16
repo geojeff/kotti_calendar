@@ -289,8 +289,8 @@ class EventListViews(BaseView):
         events = DBSession.query(Event).filter(future).order_by(Event.start).all()
         events = [event for event in events if\
                     has_permission('view', event, self.request)]
-        if len(events) > settings['events_count']:
-            events = events[:settings['events_count']]
+        if len(events) > settings['num_events']:
+            events = events[:settings['num_events']]
         return {'events': events}
 
 
