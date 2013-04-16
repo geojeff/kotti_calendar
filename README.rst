@@ -44,23 +44,21 @@ itself. There are two other scopes available:
 
 - site wide: Show all events found by an exhaustive search of the site database.
 - recursive: Show events found in the calendar itself, in the current context
-  (where the calendar "lives"), and in any content nodes below (a recursive
-  search is fired from the context to find any events contained below context).
+  (where the calendar "lives"), and in any content nodes contained within.
 
 The ``site wide`` choice is useful for a site that has a single calendar, and
-for some reason the events need to be stored in different places around the
-site. For example, if an add-on content type is a container for events, as with
-an "ArtClass" type that contains events for class periods, the __init__.py
-setup for the add-on can set the type_info.addable_to of Event, such as:::
+the events need to be stored in different places around the site. For example,
+if an add-on content type is a container for events, as with an "ArtClass" type
+that contains events for class periods, the __init__.py setup for the add-on
+can set the type_info.addable_to of Event, such as:::
 
     Event.type_info.addable_to.append("ArtClass")
 
 The ``recursive`` choice is useful for a site that has a need to show more than
-one calendar, perhaps for different divisions of a sporting league. Imagine
-that there are two divisions of the league, "East" and "West," and that there
-are separate content hierarchies for these divisions, with events held in
-some fashion within these. A calendar could be added to each division, to the
-"top" division content node, and scope set to ``recursive`` to show all events
+one calendar. Imagine a site for a sporting league, in which there are two
+divisions, "East" and "West." There are separate content hierarchies for these
+divisions, with events held in some fashion within them. A calendar could be
+added to each division, and the scope set to ``recursive`` to show all events
 for the given division.
 
 Upcoming events widget
