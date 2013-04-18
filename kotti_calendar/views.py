@@ -185,6 +185,8 @@ class CalendarView(BaseView):
         if self.context.show_events_list == 'no':
             self.context.show_events_list = ''
 
+        order = self.context.events_list_order
+
         if self.context.scope in ['calendar_only', 'site_wide']:
 
             if self.context.scope == 'calendar_only':
@@ -194,26 +196,32 @@ class CalendarView(BaseView):
 
             if self.context.show_events_list:
                 future_filter = or_(Event.start > now, Event.end > now)
-                upcoming = query.filter(future_filter).order_by(Event.start).all()
+                if order in ['past_first', 'upcoming_first', 'upcoming_only']:
+                    upcoming = query.filter(future_filter).order_by(Event.start).all()
 
-                past = query.filter(Event.start < now).order_by(desc(Event.start)).all()
+                if order in ['past_first', 'upcoming_first', 'past_only']:
+                    past = query.filter(Event.start < now).order_by(desc(Event.start)).all()
 
         else:  # scope == 'recursive':
 
             events = self.events_below_context(self.context.parent)
 
             if self.context.show_events_list:
-                upcoming = [e for e in events if e.start > now]
-                upcoming.sort(key=lambda e: e.start)
+                if order in ['past_first', 'upcoming_first', 'upcoming_only']:
+                    upcoming = [e for e in events if e.start > now]
+                    upcoming.sort(key=lambda e: e.start)
 
-                past = [e for e in events if e.start < now]
-                past.sort(key=lambda e: e.start, reverse=True)
+                if order in ['past_first', 'upcoming_first', 'past_only']:
+                    past = [e for e in events if e.start < now]
+                    past.sort(key=lambda e: e.start, reverse=True)
 
         if self.context.show_events_list:
-            upcoming = [event for event in upcoming if\
+            if order in ['past_first', 'upcoming_first', 'upcoming_only']:
+                upcoming = [event for event in upcoming if\
                         has_permission('view', event, self.request)]
 
-            past = [event for event in past if\
+            if order in ['past_first', 'upcoming_first', 'past_only']:
+                past = [event for event in past if\
                         has_permission('view', event, self.request)]
 
         datetime_format = '%Y-%m-%d %H:%M:%S'
@@ -242,10 +250,18 @@ class CalendarView(BaseView):
             'events': fullcalendar_events,
             }
 
+        events_dicts = []
+        if upcoming:
+            events_dicts.append({'label': 'upcoming', 'events': upcoming})
+        if past:
+            events_dicts.append({'label': 'past', 'events': past})
+
+        if order == 'past_first':
+            events_dicts.reverse()
+
         return {
             'api': template_api(self.context, self.request),
-            'upcoming': {'label': 'upcoming', 'events': upcoming},
-            'past': {'label': 'past', 'events': past},
+            'events_dicts': events_dicts,
             'fullcalendar_options': json.dumps(fullcalendar_options),
             }
 

@@ -7,6 +7,9 @@ Setup and Login
   >>> from kotti import testing
   >>> tools = testing.setUpFunctional(
   ...     **{'kotti.configurators': 'kotti_calendar.kotti_configure'})
+  ...        'kotti_calendar.upcoming_events_widget.slot': 'right',
+  ...        'kotti_calendar.upcoming_events_widget.num_events': '5',
+  ...       })
   >>> browser = tools['Browser']()
   >>> ctrl = browser.getControl
 
@@ -70,7 +73,7 @@ View calendar and event
   True
   >>> browser.getLink("Day off").click()
   >>> "Nov 12, 2010" in browser.contents
-  True
+  False
 
 
 Edit calendar and events

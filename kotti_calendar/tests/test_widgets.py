@@ -9,15 +9,14 @@ from kotti.testing import DummyRequest
 class TestUpcomingEventsWidget(FunctionalTestBase):
     def setUp(self):
         conf = {
-            'kotti.configurators':
-            'kotti_calendar.kotti_configure',
-            'pyramid.includes':
-            'kotti_calendar.upcoming_events_widget.slot',
+            'kotti.configurators': 'kotti_calendar.kotti_configure',
+            'kotti_calendar.upcoming_events_widget.slot': 'right',
+            'kotti_calendar.upcoming_events_widget.num_events': 5,
             }
         super(TestUpcomingEventsWidget, self).setUp(**conf)
 
     def test_view(self):
-        from kotti_calendar.widgets import upcoming_events
+        from kotti_calendar.views import EventListViews
         from kotti.resources import get_root
         from kotti.workflow import get_workflow
         from kotti_calendar.resources import Calendar
@@ -26,7 +25,7 @@ class TestUpcomingEventsWidget(FunctionalTestBase):
         now = datetime.now()
         root = get_root()
 
-        result = upcoming_events(root, DummyRequest())
+        result = EventListViews(root, DummyRequest()).upcoming_events()
         assert len(result['events']) == 0
 
         root['calendar'] = Calendar()
@@ -39,7 +38,7 @@ class TestUpcomingEventsWidget(FunctionalTestBase):
         wf = get_workflow(root)
         wf.transition_to_state(root['calendar']['event1'], None, u'public')
         wf.transition_to_state(root['calendar']['event2'], None, u'public')
-        result = upcoming_events(root, DummyRequest())
+        result = EventListViews(root, DummyRequest()).upcoming_events()
 
         events = result['events']
         assert len(events) == 2
@@ -116,7 +115,7 @@ class TestUpcomingEventsWidget(FunctionalTestBase):
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()
         browser.getLink(u'Edit').click()
-        ctrl('Show Events List?').value = u'above'
+        ctrl(name=u'show_events_list').value = ['above']
         ctrl(name=u'save').click()
         # For each past event, expect an occurrence in javascript and list on
         # the main page. Plus one because 'Past Event' is in 'Past Events'!
@@ -124,15 +123,18 @@ class TestUpcomingEventsWidget(FunctionalTestBase):
 
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()
-        ctrl('Events Display Order').value = u'upcoming_only'
+        browser.getLink(u'Edit').click()
+        ctrl(name=u'show_events_list').value = ['above']
+        ctrl(name=u'events_list_order').value = ['upcoming_only']
         ctrl(name=u'save').click()
-        # Expect only the occurrence in javascript.
-        assert browser.contents.count(u"Past Event 5") == 1
+        # Expect no past events to be present.
+        assert browser.contents.count(u"Past Event 5") == 0
 
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()
-        ctrl('Show Events List?').value = u'below'
-        ctrl('Events Display Order').value = u'upcoming_first'
+        browser.getLink(u'Edit').click()
+        ctrl(name=u'show_events_list').value = ['below']
+        ctrl(name=u'events_list_order').value = ['upcoming_first']
         ctrl(name=u'save').click()
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()
@@ -142,8 +144,9 @@ class TestUpcomingEventsWidget(FunctionalTestBase):
 
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()
-        ctrl('Show Events List?').value = u'above'
-        ctrl('Events Display Order').value = u'upcoming_first'
+        browser.getLink(u'Edit').click()
+        ctrl(name=u'show_events_list').value = ['above']
+        ctrl(name=u'events_list_order').value = ['upcoming_first']
         ctrl(name=u'save').click()
         browser.open(self.BASE_URL)
         browser.getLink(u'Calendar').click()

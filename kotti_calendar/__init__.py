@@ -10,11 +10,17 @@ def kotti_configure(settings):
 
     working_settings = upcoming_events_settings(settings=settings)
 
+    settings['kotti_calendar.upcoming_events_widget.slot'] = \
+            working_settings['slot']
+    settings['kotti_calendar.upcoming_events_widget.num_events'] = \
+            working_settings['num_events']
+
     if working_settings['slot'] != 'none':
         assign_slot('upcoming-events', working_settings['slot'])
 
     settings['pyramid.includes'] += ' kotti_calendar kotti_calendar.views'
-    settings['kotti.available_types'] += ' kotti_calendar.resources.Calendar kotti_calendar.resources.Event'
+    settings['kotti.available_types'] += \
+            ' kotti_calendar.resources.Calendar kotti_calendar.resources.Event'
 
 
 EVENTS_WIDGET_DEFAULTS = {

@@ -15,29 +15,26 @@
     <div id="fullcalendar"
          tal:condition="context.show_events_list == 'below'">
 
-    <tal:block tal:define="events_dicts (context.events_list_order == 'upcoming_first') and [upcoming, past] or [past, upcoming]"
-               tal:repeat="events_dict events_dicts">
-      <div tal:condition="events_dict['events']">
-        <h2 tal:condition="events_dict['label'] == 'upcoming'" i18n:translate="upcoming_events">Upcoming Events</h2>
-        <h2 tal:condition="events_dict['label'] == 'past'" i18n:translate="past_events">Past Events</h2>
-        <ul>
-          <li tal:repeat="event events_dict['events']">
-            <h3>
-              <a href="${api.url(event)}" title="${event.description}">
-                ${event.title}
-              </a>
-              <span tal:define="format event.all_day and api.format_date or api.format_datetime">
-                ${format(event.start)}
-                <span tal:condition="event.end">-
-                ${format(event.end)}
-                </span>
+    <div tal:repeat="events_dict events_dicts">
+      <h2 tal:condition="events_dict['label'] == 'upcoming'" i18n:translate="upcoming_events">Upcoming Events</h2>
+      <h2 tal:condition="events_dict['label'] == 'past'" i18n:translate="past_events">Past Events</h2>
+      <ul>
+        <li tal:repeat="event events_dict['events']">
+          <h3>
+            <a href="${api.url(event)}" title="${event.description}">
+              ${event.title}
+            </a>
+            <span tal:define="format event.all_day and api.format_date or api.format_datetime">
+              ${format(event.start)}
+              <span tal:condition="event.end">-
+              ${format(event.end)}
               </span>
-            </h3>
-            <p>${event.description}</p>
-          </li>
-        </ul>
-      </div>
-    </tal:block>
+            </span>
+          </h3>
+          <p>${event.description}</p>
+        </li>
+      </ul>
+    </div>
 
     <div id="fullcalendar"
          tal:condition="context.show_events_list == 'above'">

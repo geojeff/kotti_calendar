@@ -13,11 +13,10 @@ def test_kotti_configure():
 
     kotti_configure(settings)
 
-    assert settings['pyramid.includes'] == ' kotti_calendar'
-    assert settings['kotti.available_types'] == ' kotti_calendar.resources.Calendar'
-    assert settings['kotti.available_types'] += ' kotti_calendar.resources.Event'
+    assert settings['pyramid.includes'] == ' kotti_calendar kotti_calendar.views'
+    assert settings['kotti.available_types'] == ' kotti_calendar.resources.Calendar kotti_calendar.resources.Event'
 
-    assert 'kotti_calendar.upcoming_events_widget.slot' not in settings
+    assert settings['kotti_calendar.upcoming_events_widget.slot'] == 'none'
     assert settings['kotti_calendar.upcoming_events_widget.num_events'] == 5
 
     settings['kotti_calendar.upcoming_events_widget.num_events'] = "3"
