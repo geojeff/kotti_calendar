@@ -16,11 +16,11 @@
          tal:condition="context.show_events_list == 'below'">
 
     <div tal:repeat="events_dict events_dicts">
-      <h2 tal:condition="events_dict['label'] == 'upcoming'" i18n:translate="upcoming_events">Upcoming Events</h2>
-      <h2 tal:condition="events_dict['label'] == 'past'" i18n:translate="past_events">Past Events</h2>
+      <h3 tal:condition="events_dict['label'] == 'upcoming'" i18n:translate="upcoming_events">Upcoming Events</h3>
+      <h3 tal:condition="events_dict['label'] == 'past'" i18n:translate="past_events">Past Events</h3>
       <ul>
         <li tal:repeat="event events_dict['events']">
-          <h3>
+          <h4>
             <a href="${api.url(event)}" title="${event.description}">
               ${event.title}
             </a>
@@ -30,7 +30,7 @@
               ${format(event.end)}
               </span>
             </span>
-          </h3>
+          </h4>
           <p>${event.description}</p>
         </li>
       </ul>
